@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111a16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="80KG Journey">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>My 80KG Journey</title>
+<style>
+:root{--bg:#101713;--panel:#19231d;--panel2:#202d25;--line:#304238;--text:#f1f5f1;--muted:#a7b5aa;--green:#a8cf9b;--green2:#6f9c69;--orange:#efad70;--red:#e58c83}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding-bottom:88px}
+header{padding:22px 18px 15px;background:linear-gradient(135deg,#1c2b22,#111a16);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}.brand{font-size:19px;font-weight:800;letter-spacing:-.4px}.brand span{color:var(--green)}.week{font-size:12px;color:var(--green);background:#2b3d30;padding:7px 10px;border-radius:30px}
+main{max-width:760px;margin:auto;padding:16px}.view{display:none}.view.active{display:block}
+h1{font-size:25px;margin:5px 0 4px;letter-spacing:-.6px}h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:0 0 8px}p{color:var(--muted);line-height:1.5;margin:6px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:15px;margin:10px 0}.metric small,.muted,small{color:var(--muted)}.metric strong{display:block;font-size:27px;margin-top:5px}.metric em{font-size:12px;color:var(--muted);font-style:normal}
+.progress{height:9px;background:#35443a;border-radius:9px;overflow:hidden;margin:10px 0}.progress>i{display:block;height:100%;background:var(--green);width:0%;border-radius:9px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.pill{font-size:11px;color:var(--green);background:#293a2e;border-radius:20px;padding:6px 9px}
+button,.btn{border:0;border-radius:12px;padding:12px 14px;background:var(--green);color:#142018;font-weight:750;font-size:14px;cursor:pointer}button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}button.danger{background:#442c2b;color:#ffd7d1}button:active{transform:scale(.98)}
+input,select,textarea{width:100%;background:#101813;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:11px;font:inherit;margin:5px 0 11px}label{display:block;color:var(--muted);font-size:12px;margin-top:8px}textarea{min-height:80px;resize:vertical}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}.nav{position:fixed;bottom:0;left:0;right:0;background:#141e18;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 3px calc(8px + env(safe-area-inset-bottom));z-index:10}.nav button{background:transparent;color:var(--muted);padding:7px 5px;font-size:10px;min-width:0;flex:1}.nav button.active{color:var(--green)}.nav b{display:block;font-size:19px;margin-bottom:3px}
+.item{padding:11px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}.item strong{display:block}.tag{font-size:11px;color:var(--orange)}.check{display:flex;align-items:center;gap:9px;margin:9px 0;color:var(--text)}.check input{width:auto;margin:0;accent-color:var(--green)}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;padding:9px 5px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600}
+.notice{font-size:12px;background:#26372b;border-radius:12px;padding:11px;color:#d9e8d8;line-height:1.5}.tabs{display:flex;gap:7px;overflow:auto;margin:12px 0}.tabs button{white-space:nowrap}.empty{color:var(--muted);font-size:13px;padding:12px 0}
+canvas{width:100%;height:190px}
+@media(min-width:650px){main{padding:24px}.grid.three{grid-template-columns:repeat(3,1fr)}header{padding-left:max(18px,calc((100% - 712px)/2))}}
+</style>
+</head>
+<body>
+<header><div class="top"><div class="brand">MY <span>80KG</span> JOURNEY</div><div class="week" id="weekPill">WEEK 1 · LET'S GO</div></div></header>
+<main>
+<section class="view active" id="home">
+<h1>Your journey starts here.</h1><p>Small steps. Strong habits. Sustainable progress.</p>
+<div class="grid">
+ <div class="card metric"><small>CURRENT WEIGHT</small><strong id="currentWeight">90.2 kg</strong><em>Latest weigh-in</em></div>
+ <div class="card metric"><small>TARGET WEIGHT</small><strong>80.0 kg</strong><em>Goal weight</em></div>
+ <div class="card metric"><small>LOST SO FAR</small><strong id="lost">0.0 kg</strong><em>Since starting</em></div>
+ <div class="card metric"><small>TO GO</small><strong id="remaining">10.2 kg</strong><em>Keep showing up</em></div>
+</div>
+<div class="card"><div class="row"><h2>Progress to 80kg</h2><span class="pill" id="progressPct">0% complete</span></div><div class="progress"><i id="progressBar"></i></div><p id="progressCaption">Your starting point is 90.2kg.</p></div>
+<div class="card"><div class="row"><h2>Today's focus</h2><span class="pill" id="todayDate"></span></div>
+<label class="check"><input type="checkbox" data-habit="water"> Drink water regularly</label>
+<label class="check"><input type="checkbox" data-habit="movement"> Walk or move today</label>
+<label class="check"><input type="checkbox" data-habit="protein"> Include protein in both meals</label>
+<label class="check"><input type="checkbox" data-habit="sleep"> Prioritise sleep and recovery</label>
+<p class="muted" id="habitCount">0 of 4 completed</p></div>
+<div class="card"><h2>Quick actions</h2><div class="actions"><button onclick="show('weight')">＋ Log weight</button><button class="secondary" onclick="show('checkin')">Weekly check-in</button></div></div>
+<div class="notice">Your initial guide: around 1,900 kcal/day and 110–130g protein. These are estimates to review against your energy, training and weight trend. Don't try to compensate for missed targets by skipping meals.</div>
+</section>
+
+<section class="view" id="food">
+<h1>Food & nutrition</h1><p>Two substantial meals can work. Add a snack when needed to meet your energy and protein needs.</p>
+<div class="grid">
+ <div class="card metric"><small>DAILY CALORIE GUIDE</small><strong>1,900</strong><em>Estimated starting target</em></div>
+ <div class="card metric"><small>PROTEIN GUIDE</small><strong>110–130g</strong><em>Per day</em></div>
+</div>
+<div class="card"><h2>Log food</h2>
+<label>Meal</label><select id="mealType"><option>Meal 1</option><option>Meal 2</option><option>Snack</option><option>Drink</option></select>
+<label>Food / drink</label><input id="foodName" placeholder="e.g. chicken, rice and vegetables">
+<div class="grid"><div><label>Calories (kcal)</label><input id="foodCalories" type="number" min="0" placeholder="e.g. 650"></div><div><label>Protein (g)</label><input id="foodProtein" type="number" min="0" placeholder="e.g. 45"></div></div>
+<button onclick="addFood()">Save food entry</button></div>
+<div class="card"><div class="row"><h2>Today's totals</h2><span class="pill" id="foodDate"></span></div><div class="grid"><div class="metric"><strong id="calTotal">0</strong><em>Calories</em></div><div class="metric"><strong id="proteinTotal">0g</strong><em>Protein</em></div></div><div class="progress"><i id="calBar"></i></div><div id="foodEntries" class="empty">No food logged today yet.</div></div>
+<div class="card"><h2>Simple meal rotation</h2>
+<div class="item"><strong>Eggs, oats and toast</strong><p>3 eggs, 60g oats, 2 slices wholemeal toast and a banana.</p></div>
+<div class="item"><strong>Chicken and rice bowl</strong><p>Chicken, rice, kidney beans and frozen mixed vegetables.</p></div>
+<div class="item"><strong>Tuna jacket potato</strong><p>Baked potato, tuna in spring water, sweetcorn and salad.</p></div>
+<div class="item"><strong>Chicken and bean stew</strong><p>Chicken, kidney beans, chopped tomatoes, onions and rice.</p></div>
+<p class="muted">Portions and calories vary by brand and cooking method. Use packet labels and weigh ingredients for more accurate tracking.</p></div>
+</section>
+
+<section class="view" id="gym">
+<h1>Gym tracker</h1><p>Build strength, protect muscle and improve fitness. Start light and focus on technique.</p>
+<div class="tabs"><button class="secondary" onclick="renderWorkout('A')">Workout A</button><button class="secondary" onclick="renderWorkout('B')">Workout B</button><button class="secondary" onclick="renderWorkout('C')">Cardio</button></div>
+<div class="card" id="workoutCard"></div>
+<div class="card"><h2>Log a gym session</h2><label>Session</label><select id="sessionType"><option>Full body A</option><option>Full body B</option><option>Cardio</option><option>Walk / active recovery</option></select><div class="grid"><div><label>Duration (minutes)</label><input type="number" id="sessionMinutes" placeholder="45"></div><div><label>How did it feel?</label><select id="sessionFeel"><option>Good</option><option>Okay</option><option>Tough</option></select></div></div><label>Notes</label><input id="sessionNotes" placeholder="Weights, reps, energy..."><button onclick="addSession()">Save session</button></div>
+<div class="card"><h2>Recent sessions</h2><div id="sessionList" class="empty">No sessions logged yet.</div></div>
+</section>
+
+<section class="view" id="weight">
+<h1>Weight & progress</h1><p>Weigh under similar conditions, ideally in the morning after using the toilet.</p>
+<div class="card"><h2>Record weigh-in</h2><label>Weight (kg)</label><input id="weightInput" type="number" min="30" max="300" step="0.1" placeholder="e.g. 89.6"><label>Date</label><input id="weightDate" type="date"><button onclick="addWeight()">Save weigh-in</button></div>
+<div class="card"><h2>Your weight trend</h2><canvas id="weightChart" width="650" height="220"></canvas><div id="weightHistory" class="empty"></div></div>
+<div class="card"><h2>Milestones</h2><div class="item">First milestone <strong>87 kg</strong></div><div class="item">Next milestone <strong>85 kg</strong></div><div class="item">Next milestone <strong>82 kg</strong></div><div class="item">Goal <strong>80 kg</strong></div><p class="muted">These are motivational milestones, not deadlines.</p></div>
+</section>
+
+<section class="view" id="checkin">
+<h1>Weekly check-in</h1><p>Review the whole week, not just the number on the scale.</p>
+<div class="card"><h2>Check-in details</h2><label>Current weight (kg)</label><input id="checkWeight" type="number" step="0.1" placeholder="e.g. 89.4"><label>Gym sessions completed</label><select id="checkGym"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select><label>Average daily steps</label><input id="checkSteps" type="number" placeholder="e.g. 7500"><label>How was your hunger?</label><select id="checkHunger"><option>Comfortable</option><option>A little hungry</option><option>Very hungry</option><option>Often too full</option></select><label>Energy and recovery</label><select id="checkEnergy"><option>Good</option><option>Okay</option><option>Low</option><label></label></select><label>What went well this week?</label><textarea id="checkWins" placeholder="e.g. prepared meals, trained three times..."></textarea><label>What was difficult?</label><textarea id="checkChallenges" placeholder="e.g. cravings, time, budget, tiredness..."></textarea><button onclick="saveCheckin()">Save check-in</button></div>
+<div class="card"><h2>Share your progress with ChatGPT</h2><p>Generate a summary of your latest entries. Copy it and paste it into our ChatGPT conversation for a review and plan adjustments.</p><button onclick="makeReport()">Generate my check-in report</button><textarea id="report" placeholder="Your report will appear here..." readonly></textarea><button class="secondary" onclick="copyReport()">Copy report</button></div>
+<div class="card"><h2>Past check-ins</h2><div id="checkinHistory" class="empty">No check-ins saved yet.</div></div>
+</section>
+
+<section class="view" id="shop">
+<h1>Shopping & budget</h1><p>Affordable staples for a flexible weekly food plan. Tick items as you shop.</p>
+<div class="card"><div class="row"><h2>Weekly shopping list</h2><span class="pill">Aim: £25–£30</span></div><div id="shoppingList"></div><p class="muted">Prices vary by supermarket and offers. Check your basket total before buying; adjust quantities and use own-brand or frozen options.</p></div>
+<div class="card"><h2>Budget notes</h2><label>Weekly spend (£)</label><input id="spendInput" type="number" step="0.01" placeholder="e.g. 28.50"><button onclick="saveSpend()">Save spend</button><p id="spendDisplay" class="muted">No spend recorded.</p></div>
+</section>
+
+<section class="view" id="settings">
+<h1>Settings & backup</h1><p>Your entries are stored on this device in this browser.</p>
+<div class="card"><h2>Your starting details</h2><table><tr><td>Age</td><td>37</td></tr><tr><td>Height</td><td>5'7" (170 cm)</td></tr><tr><td>Starting weight</td><td>90.2 kg</td></tr><tr><td>Goal</td><td>80 kg</td></tr><tr><td>Food preferences</td><td>No pork; slightly lactose intolerant</td></tr><tr><td>Training</td><td>3–4 gym days/week</td></tr><tr><td>Food budget</td><td>£25–£30/week</td></tr></table></div>
+<div class="card"><h2>Data backup</h2><p>Export a backup so you can keep your records if you change phones or browsers.</p><div class="actions"><button onclick="exportData()">Export backup</button><button class="secondary" onclick="document.getElementById('importFile').click()">Import backup</button><input id="importFile" type="file" accept="application/json" hidden onchange="importData(event)"></div></div>
+<div class="card"><h2>Reset app data</h2><p>This permanently clears locally saved logs on this device.</p><button class="danger" onclick="resetData()">Reset my data</button></div>
+<div class="notice">Privacy: this first version does not send your weight, food or workout data to a server. Keep your phone locked and export backups securely. This is a tracking tool, not medical advice.</div>
+</section>
+</main>
+<nav class="nav">
+<button class="active" data-view="home" onclick="show('home')"><b>⌂</b>Home</button>
+<button data-view="food" onclick="show('food')"><b>◉</b>Food</button>
+<button data-view="gym" onclick="show('gym')"><b>▣</b>Gym</button>
+<button data-view="weight" onclick="show('weight')"><b>⚖</b>Weight</button>
+<button data-view="checkin" onclick="show('checkin')"><b>✓</b>Check-in</button>
+<button data-view="shop" onclick="show('shop')"><b>▤</b>Shop</button>
+<button data-view="settings" onclick="show('settings')"><b>⚙</b>More</button>
+</nav>
+<script>
+const KEY='my80kgJourney_v1';
+const defaults={startWeight:90.2,goal:80,weights:[{date:new Date().toISOString().slice(0,10),value:90.2}],foods:[],sessions:[],checkins:[],habits:{},shopping:{},spend:null};
+let data=load();
+function load(){try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...defaults}}}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll()}
+function today(){return new Date().toISOString().slice(0,10)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function show(id){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.view===id));if(id==='weight')drawChart();if(id==='gym')renderWorkout('A');window.scrollTo(0,0)}
+document.querySelectorAll('[data-habit]').forEach(el=>{el.addEventListener('change',()=>{data.habits[today()]??={};data.habits[today()][el.dataset.habit]=el.checked;localStorage.setItem(KEY,JSON.stringify(data));updateHabits()})});
+function updateHabits(){let h=data.habits[today()]||{};document.querySelectorAll('[data-habit]').forEach(el=>el.checked=!!h[el.dataset.habit]);let n=Object.values(h).filter(Boolean).length;document.getElementById('habitCount').textContent=n+' of 4 completed'}
+function latestWeight(){return [...data.weights].sort((a,b)=>a.date.localeCompare(b.date)).at(-1)?.value??90.2}
+function renderHome(){let w=latestWeight(),lost=data.startWeight-w,remaining=Math.max(0,w-data.goal),pct=Math.max(0,Math.min(100,lost/(data.startWeight-data.goal)*100));document.getElementById('currentWeight').textContent=w.toFixed(1)+' kg';document.getElementById('lost').textContent=lost.toFixed(1)+' kg';document.getElementById('remaining').textContent=remaining.toFixed(1)+' kg';document.getElementById('progressPct').textContent=pct.toFixed(0)+'% complete';document.getElementById('progressBar').style.width=pct+'%';document.getElementById('progressCaption').textContent=pct>0?'You have made progress. Keep building steady habits.':'Your starting point is 90.2kg.';document.getElementById('todayDate').textContent=new Date().toLocaleDateString(undefined,{day:'numeric',month:'short'});let days=Math.max(1,Math.floor((Date.now()-new Date(data.weights[0].date).getTime())/86400000));document.getElementById('weekPill').textContent='WEEK '+(Math.floor(days/7)+1)+' · LET’S GO';updateHabits()}
+function addFood(){let name=document.getElementById('foodName').value.trim(),cal=Number(document.getElementById('foodCalories').value),pro=Number(document.getElementById('foodProtein').value);if(!name||cal<0||!Number.isFinite(cal)){alert('Please enter a food name and valid calories.');return}data.foods.push({date:today(),type:document.getElementById('mealType').value,name,cal,pro:pro||0});['foodName','foodCalories','foodProtein'].forEach(id=>document.getElementById(id).value='');save()}
+function renderFood(){let list=data.foods.filter(x=>x.date===today()),cal=list.reduce((s,x)=>s+x.cal,0),pro=list.reduce((s,x)=>s+x.pro,0);document.getElementById('calTotal').textContent=Math.round(cal);document.getElementById('proteinTotal').textContent=Math.round(pro)+'g';document.getElementById('calBar').style.width=Math.min(100,cal/1900*100)+'%';document.getElementById('foodDate').textContent=new Date().toLocaleDateString();document.getElementById('foodEntries').innerHTML=list.length?list.map(x=>`<div class="item"><div class="row"><strong>${esc(x.name)}</strong><span>${x.cal} kcal</span></div><p>${esc(x.type)} · ${x.pro}g protein</p></div>`).join(''):'No food logged today yet.'}
+const workouts={A:[['Leg press','3 × 10–12'],['Chest press','3 × 10–12'],['Lat pulldown','3 × 10–12'],['Seated leg curl','2 × 12'],['Seated row','3 × 10–12'],['Plank','3 × 20–30 sec']],B:[['Goblet squat','3 × 10'],['Dumbbell shoulder press','3 × 10'],['Seated cable row','3 × 12'],['Romanian deadlift','3 × 10'],['Chest press','2 × 12'],['Abdominal crunch','3 × 15']],C:[['Treadmill walk','10 min'],['Exercise bike','15 min'],['Cross trainer','10–15 min'],['Gentle stretching','5 min']]};
+function renderWorkout(k){let title=k==='C'?'Optional cardio':'Full body '+k;document.getElementById('workoutCard').innerHTML=`<div class="row"><h2>${title}</h2><span class="pill">${k==='C'?'Conditioning':'Strength'}</span></div>`+workouts[k].map((x,i)=>`<div class="item row"><div><strong>${x[0]}</strong><p>${x[1]}</p></div><span class="tag">Exercise ${i+1}</span></div>`).join('')+'<p class="muted">Warm up for 5–10 minutes. Choose manageable resistance, use controlled technique and stop if you feel pain, dizziness or unwell.</p>'}
+function addSession(){let minutes=Number(document.getElementById('sessionMinutes').value)||0;data.sessions.unshift({date:today(),type:document.getElementById('sessionType').value,minutes,feel:document.getElementById('sessionFeel').value,notes:document.getElementById('sessionNotes').value});document.getElementById('sessionMinutes').value='';document.getElementById('sessionNotes').value='';save()}
+function renderSessions(){let el=document.getElementById('sessionList');el.innerHTML=data.sessions.length?data.sessions.slice(0,8).map(x=>`<div class="item"><div class="row"><strong>${esc(x.type)}</strong><span>${esc(x.date)}</span></div><p>${x.minutes} min · ${esc(x.feel)} ${x.notes?'· '+esc(x.notes):''}</p></div>`).join(''):'No sessions logged yet.'}
+function addWeight(){let v=Number(document.getElementById('weightInput').value),d=document.getElementById('weightDate').value||today();if(!v||v<30||v>300){alert('Enter a valid weight in kg.');return}data.weights.push({date:d,value:v});document.getElementById('weightInput').value='';save();drawChart()}
+function drawChart(){let c=document.getElementById('weightChart');if(!c)return;let ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);let vals=[...data.weights].sort((a,b)=>a.date.localeCompare(b.date));if(!vals.length)return;let min=Math.min(...vals.map(x=>x.value),80)-1,max=Math.max(...vals.map(x=>x.value),90.2)+1;ctx.strokeStyle='#3a4b40';ctx.lineWidth=1;for(let i=0;i<5;i++){let y=15+i*(h-40)/4;ctx.beginPath();ctx.moveTo(40,y);ctx.lineTo(w-12,y);ctx.stroke()}ctx.fillStyle='#a7b5aa';ctx.font='13px sans-serif';ctx.fillText(max.toFixed(1),3,20);ctx.fillText(min.toFixed(1),3,h-20);if(vals.length===1){let y=h-20-(vals[0].value-min)/(max-min)*(h-40);ctx.fillStyle='#a8cf9b';ctx.beginPath();ctx.arc(w/2,y,6,0,Math.PI*2);ctx.fill()}else{ctx.strokeStyle='#a8cf9b';ctx.lineWidth=3;ctx.beginPath();vals.forEach((x,i)=>{let px=40+i*(w-60)/(vals.length-1),py=h-20-(x.value-min)/(max-min)*(h-40);i?ctx.lineTo(px,py):ctx.moveTo(px,py)});ctx.stroke();vals.forEach((x,i)=>{let px=40+i*(w-60)/(vals.length-1),py=h-20-(x.value-min)/(max-min)*(h-40);ctx.fillStyle='#a8cf9b';ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);ctx.fill()})}document.getElementById('weightHistory').innerHTML=vals.slice().reverse().map(x=>`<div class="item row"><span>${esc(x.date)}</span><strong>${Number(x.value).toFixed(1)} kg</strong></div>`).join('')}
+function saveCheckin(){let item={date:today(),weight:Number(document.getElementById('checkWeight').value)||latestWeight(),gym:document.getElementById('checkGym').value,steps:document.getElementById('checkSteps').value,hunger:document.getElementById('checkHunger').value,energy:document.getElementById('checkEnergy').value,wins:document.getElementById('checkWins').value,challenges:document.getElementById('checkChallenges').value};data.checkins.unshift(item);if(item.weight)data.weights.push({date:today(),value:item.weight});save();alert('Your check-in has been saved.')}
+function renderCheckins(){document.getElementById('checkinHistory').innerHTML=data.checkins.length?data.checkins.map(x=>`<div class="item"><div class="row"><strong>${esc(x.date)}</strong><span>${x.weight.toFixed(1)} kg</span></div><p>${x.gym} gym sessions · ${esc(x.hunger)} hunger · ${esc(x.energy)} energy</p></div>`).join(''):'No check-ins saved yet.'}
+function makeReport(){let w=latestWeight(),c=data.checkins[0],s=data.sessions.filter(x=>x.date>=new Date(Date.now()-7*86400000).toISOString().slice(0,10));let foods=data.foods.filter(x=>x.date>=new Date(Date.now()-7*86400000).toISOString().slice(0,10));let avg=foods.length?Math.round(foods.reduce((a,x)=>a+x.cal,0)/Math.max(1,new Set(foods.map(x=>x.date)).size)):0;let report=`MY 80KG JOURNEY — WEEKLY CHECK-IN\nDate: ${today()}\nStarting weight: ${data.startWeight} kg\nLatest weight: ${w} kg\nChange since start: ${(data.startWeight-w).toFixed(1)} kg\nGoal: 80 kg\nGym sessions logged in last 7 days: ${s.length}\nFood entries logged in last 7 days: ${foods.length}\nAverage calories per day with food logs (rough): ${avg||'Not enough entries'}\nLatest check-in: ${c?c.date:'Not completed'}\nGym sessions reported: ${c?.gym||'—'}\nAverage steps: ${c?.steps||'—'}\nHunger: ${c?.hunger||'—'}\nEnergy: ${c?.energy||'—'}\nWhat went well: ${c?.wins||'—'}\nChallenges: ${c?.challenges||'—'}\nPlease review my progress and suggest sensible adjustments to my food and gym plan. Keep my £25–£30 weekly food budget, no pork and mild lactose intolerance in mind.`;document.getElementById('report').value=report}
+async function copyReport(){let t=document.getElementById('report').value;if(!t){makeReport();t=document.getElementById('report').value}try{await navigator.clipboard.writeText(t);alert('Report copied. Paste it into our ChatGPT conversation.')}catch(e){document.getElementById('report').select();alert('Select and copy the report text.')}} 
+const items=['Oats · 500g','Eggs · 15','Chicken · around 1kg','Tinned tuna · 3 tins','Rice · 500g','Potatoes · 1–1.5kg','Wholemeal bread · 1 loaf','Kidney beans · 3 tins','Chopped tomatoes · 3 tins','Frozen mixed vegetables · 1kg','Bananas · 6–7','Apples · 4–5','Onions · 3–4'];
+function renderShop(){document.getElementById('shoppingList').innerHTML=items.map((x,i)=>`<label class="check"><input type="checkbox" ${data.shopping[i]?'checked':''} onchange="data.shopping[${i}]=this.checked;localStorage.setItem(KEY,JSON.stringify(data))">${x}</label>`).join('');document.getElementById('spendDisplay').textContent=data.spend==null?'No spend recorded.':'Last recorded weekly spend: £'+Number(data.spend).toFixed(2)}
+function saveSpend(){data.spend=Number(document.getElementById('spendInput').value);save()}
+function renderAll(){renderHome();renderFood();renderSessions();renderCheckins();renderShop();if(document.getElementById('weight').classList.contains('active'))drawChart()}
+function exportData(){let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='80kg-journey-backup-'+today()+'.json';a.click();URL.revokeObjectURL(a.href)}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{data={...defaults,...JSON.parse(r.result)};save();alert('Backup imported.')}catch(err){alert('That backup file could not be read.')}};r.readAsText(f)}
+function resetData(){if(confirm('Are you sure? This will erase all locally saved entries. Export a backup first if you want to keep them.')){localStorage.removeItem(KEY);data={...defaults,weights:[{date:today(),value:90.2}]};save()}}
+document.getElementById('weightDate').value=today();
+renderAll();renderWorkout('A');
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>

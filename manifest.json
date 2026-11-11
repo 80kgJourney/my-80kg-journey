@@ -1,0 +1,9 @@
+{
+  "name": "My 80KG Journey",
+  "short_name": "80KG Journey",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#101713",
+  "theme_color": "#111a16",
+  "description": "Personal weight, food, gym and weekly check-in tracker"
+}
