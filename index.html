@@ -25,7 +25,7 @@ input,select,textarea{width:100%;background:#101813;border:1px solid var(--line)
 .actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}.nav{position:fixed;bottom:0;left:0;right:0;background:#141e18;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 3px calc(8px + env(safe-area-inset-bottom));z-index:10}.nav button{background:transparent;color:var(--muted);padding:7px 5px;font-size:10px;min-width:0;flex:1}.nav button.active{color:var(--green)}.nav b{display:block;font-size:19px;margin-bottom:3px}
 .item{padding:11px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}.item strong{display:block}.tag{font-size:11px;color:var(--orange)}.check{display:flex;align-items:center;gap:9px;margin:9px 0;color:var(--text)}.check input{width:auto;margin:0;accent-color:var(--green)}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;padding:9px 5px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600}
-.notice{font-size:12px;background:#26372b;border-radius:12px;padding:11px;color:#d9e8d8;line-height:1.5}.tabs{display:flex;gap:7px;overflow:auto;margin:12px 0}.tabs button{white-space:nowrap}.empty{color:var(--muted);font-size:13px;padding:12px 0}
+.notice{font-size:12px;background:#26372b;border-radius:12px;padding:11px;color:#d9e8d8;line-height:1.5}.tabs{display:flex;gap:7px;overflow:auto;margin:12px 0}.tabs button{white-space:nowrap}.empty{color:var(--muted);font-size:13px;padding:12px 0}.plan-day{min-width:76px}.ingredient-list{margin:8px 0}.ingredient-list .row{font-size:13px;padding:5px 0;border-bottom:1px solid #304238}.meal-card{background:#202d25;border:1px solid #304238;border-radius:13px;padding:12px;margin:10px 0}.meal-total{font-size:13px;color:var(--green);font-weight:700}.day-total{font-size:15px;font-weight:800;color:var(--green)}.log-plan{width:100%;margin-top:10px}
 canvas{width:100%;height:190px}
 @media(min-width:650px){main{padding:24px}.grid.three{grid-template-columns:repeat(3,1fr)}header{padding-left:max(18px,calc((100% - 712px)/2))}}
 </style>
@@ -53,7 +53,9 @@ canvas{width:100%;height:190px}
 </section>
 
 <section class="view" id="food">
-<h1>Food & nutrition</h1><p>Two substantial meals can work. Add a snack when needed to meet your energy and protein needs.</p>
+<h1>Your 7-day meal plan</h1><p>Two main meals plus a planned snack/top-up each day. Weigh ingredients as listed. Calories and protein are estimates; use the packet label for branded foods.</p>
+<div class="card"><div class="row"><h2>This week's plan</h2><span class="pill">~1,900 kcal/day guide</span></div><div class="tabs" id="planDays"></div><div id="planContent"></div><div class="notice">Weigh rice, pasta and oats dry; weigh meat raw; weigh tinned beans and tuna after draining. Oil is included in the quantities. If your product label differs, use its figures. The plan is a guide, not a requirement to eat when uncomfortably full.</div></div>
+<h2>Food diary</h2><p>Log meals from the plan with one tap, or add anything else you eat.</p>
 <div class="grid">
  <div class="card metric"><small>DAILY CALORIE GUIDE</small><strong>1,900</strong><em>Estimated starting target</em></div>
  <div class="card metric"><small>PROTEIN GUIDE</small><strong>110–130g</strong><em>Per day</em></div>
@@ -110,7 +112,7 @@ canvas{width:100%;height:190px}
 </main>
 <nav class="nav">
 <button class="active" data-view="home" onclick="show('home')"><b>⌂</b>Home</button>
-<button data-view="food" onclick="show('food')"><b>◉</b>Food</button>
+<button data-view="food" onclick="show('food')"><b>◉</b>Plan/Log</button>
 <button data-view="gym" onclick="show('gym')"><b>▣</b>Gym</button>
 <button data-view="weight" onclick="show('weight')"><b>⚖</b>Weight</button>
 <button data-view="checkin" onclick="show('checkin')"><b>✓</b>Check-in</button>
@@ -120,6 +122,45 @@ canvas{width:100%;height:190px}
 <script>
 const KEY='my80kgJourney_v1';
 const defaults={startWeight:90.2,goal:80,weights:[{date:new Date().toISOString().slice(0,10),value:90.2}],foods:[],sessions:[],checkins:[],habits:{},shopping:{},spend:null};
+const weeklyPlan=[
+ {day:'Monday',meals:[
+  {name:'Meal 1 · Eggs, oats, toast & banana',items:[['Eggs','2 large',144,12.6],['Oats','60 g dry',233,10.1],['Wholemeal bread','2 slices',190,8],['Banana','1 medium',105,1.3]]},
+  {name:'Meal 2 · Chicken, rice & kidney bean bowl',items:[['Chicken breast','200 g raw',240,46],['Rice','90 g dry',324,6.3],['Kidney beans','100 g drained',110,7],['Frozen mixed vegetables','250 g',125,7.5],['Cooking oil','5 g',45,0]]},
+  {name:'Snack / top-up · Eggs, toast & apple',items:[['Eggs','2 large',144,12.6],['Wholemeal bread','2 slices',190,8],['Apple','1 medium',95,.5]]}
+ ]},
+ {day:'Tuesday',meals:[
+  {name:'Meal 1 · Eggs, baked beans & toast',items:[['Eggs','3 large',216,18.9],['Baked beans','150 g',120,7.2],['Wholemeal bread','2 slices',190,8],['Apple','1 medium',95,.5]]},
+  {name:'Meal 2 · Tuna, potato & sweetcorn',items:[['Potatoes','450 g raw',347,9],['Tuna in spring water','160 g drained',186,41.6],['Sweetcorn','100 g drained',86,3.4],['Frozen mixed vegetables','200 g',100,6],['Cooking oil','5 g',45,0]]},
+  {name:'Snack / top-up · Oats, banana & toast',items:[['Oats','60 g dry',233,10.1],['Banana','1 medium',105,1.3],['Wholemeal bread','2 slices',190,8],['Egg','1 large',72,6.3]]}
+ ]},
+ {day:'Wednesday',meals:[
+  {name:'Meal 1 · Banana porridge & eggs',items:[['Oats','80 g dry',311,13.5],['Banana','1 medium',105,1.3],['Eggs','2 large',144,12.6]]},
+  {name:'Meal 2 · Chicken, bean & tomato rice',items:[['Chicken breast','200 g raw',240,46],['Kidney beans','100 g drained',110,7],['Chopped tomatoes','200 g',50,2.4],['Rice','80 g dry',288,5.6],['Onion','50 g',20,.6],['Frozen mixed vegetables','100 g',50,3],['Cooking oil','5 g',45,0]]},
+  {name:'Snack / top-up · Oats, banana, egg & toast',items:[['Oats','40 g dry',156,6.8],['Banana','1 medium',105,1.3],['Egg','1 large',72,6.3],['Wholemeal bread','2 slices',190,8]]}
+ ]},
+ {day:'Thursday',meals:[
+  {name:'Meal 1 · Vegetable omelette & potatoes',items:[['Eggs','4 large',288,25.2],['Frozen mixed vegetables','150 g',75,4.5],['Potatoes','250 g raw',193,5],['Apple','1 medium',95,.5],['Cooking oil','5 g',45,0]]},
+  {name:'Meal 2 · Tuna tomato pasta',items:[['Tuna in spring water','120 g drained',139,31.2],['Wholemeal pasta','100 g dry',350,13],['Chopped tomatoes','200 g',50,2.4],['Frozen mixed vegetables','100 g',50,3],['Onion','50 g',20,.6],['Cooking oil','5 g',45,0]]},
+  {name:'Snack / top-up · Oats, fruit, toast & egg',items:[['Oats','80 g dry',311,13.5],['Banana','1 medium',105,1.3],['Apple','1 medium',95,.5],['Wholemeal bread','1 slice',95,4],['Egg','1 large',72,6.3]]}
+ ]},
+ {day:'Friday',meals:[
+  {name:'Meal 1 · Eggs, oats, toast & banana',items:[['Eggs','3 large',216,18.9],['Oats','60 g dry',233,10.1],['Wholemeal bread','1 slice',95,4],['Banana','1 medium',105,1.3]]},
+  {name:'Meal 2 · Chicken, potatoes & vegetables',items:[['Chicken breast','200 g raw',240,46],['Potatoes','300 g raw',231,6],['Frozen mixed vegetables','250 g',125,7.5],['Cooking oil','5 g',45,0]]},
+  {name:'Snack / top-up · Tuna sandwich, fruit & oats',items:[['Tuna in spring water','80 g drained',93,20.8],['Wholemeal bread','2 slices',190,8],['Apple','1 medium',95,.5],['Oats','40 g dry',156,6.8],['Banana','1 medium',105,1.3]]}
+ ]},
+ {day:'Saturday',meals:[
+  {name:'Meal 1 · Eggs, beans, toast & banana',items:[['Eggs','3 large',216,18.9],['Baked beans','150 g',120,7.2],['Wholemeal bread','2 slices',190,8],['Banana','1 medium',105,1.3]]},
+  {name:'Meal 2 · Chicken & vegetable rice with egg',items:[['Chicken breast','200 g raw',240,46],['Rice','90 g dry',324,6.3],['Frozen mixed vegetables','250 g',125,7.5],['Egg','1 large',72,6.3],['Cooking oil','5 g',45,0]]},
+  {name:'Snack / top-up · Oats, apple & banana',items:[['Oats','60 g dry',233,10.1],['Apple','1 medium',95,.5],['Banana','1 medium',105,1.3]]}
+ ]},
+ {day:'Sunday',meals:[
+  {name:'Meal 1 · Oats, eggs & banana',items:[['Oats','80 g dry',311,13.5],['Eggs','2 large',144,12.6],['Banana','1 medium',105,1.3]]},
+  {name:'Meal 2 · Tuna, potato & kidney bean bowl',items:[['Tuna in spring water','120 g drained',139,31.2],['Potatoes','275 g raw',212,5.5],['Kidney beans','100 g drained',110,7],['Frozen mixed vegetables','200 g',100,6],['Chopped tomatoes','100 g',25,1.2],['Onion','30 g',12,.3],['Cooking oil','5 g',45,0]]},
+  {name:'Snack / top-up · Chicken sandwich, oats & fruit',items:[['Chicken breast','100 g raw',120,23],['Wholemeal bread','2 slices',190,8],['Apple','1 medium',95,.5],['Oats','60 g dry',233,10.1],['Banana','1 medium',105,1.3]]}
+ ]}
+];
+let selectedPlanDay=0;
+
 let data=load();
 function load(){try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...defaults}}}
 function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll()}
@@ -130,6 +171,10 @@ document.querySelectorAll('[data-habit]').forEach(el=>{el.addEventListener('chan
 function updateHabits(){let h=data.habits[today()]||{};document.querySelectorAll('[data-habit]').forEach(el=>el.checked=!!h[el.dataset.habit]);let n=Object.values(h).filter(Boolean).length;document.getElementById('habitCount').textContent=n+' of 4 completed'}
 function latestWeight(){return [...data.weights].sort((a,b)=>a.date.localeCompare(b.date)).at(-1)?.value??90.2}
 function renderHome(){let w=latestWeight(),lost=data.startWeight-w,remaining=Math.max(0,w-data.goal),pct=Math.max(0,Math.min(100,lost/(data.startWeight-data.goal)*100));document.getElementById('currentWeight').textContent=w.toFixed(1)+' kg';document.getElementById('lost').textContent=lost.toFixed(1)+' kg';document.getElementById('remaining').textContent=remaining.toFixed(1)+' kg';document.getElementById('progressPct').textContent=pct.toFixed(0)+'% complete';document.getElementById('progressBar').style.width=pct+'%';document.getElementById('progressCaption').textContent=pct>0?'You have made progress. Keep building steady habits.':'Your starting point is 90.2kg.';document.getElementById('todayDate').textContent=new Date().toLocaleDateString(undefined,{day:'numeric',month:'short'});let days=Math.max(1,Math.floor((Date.now()-new Date(data.weights[0].date).getTime())/86400000));document.getElementById('weekPill').textContent='WEEK '+(Math.floor(days/7)+1)+' · LET’S GO';updateHabits()}
+function mealTotals(meal){return meal.items.reduce((a,x)=>({cal:a.cal+x[2],pro:a.pro+x[3]}),{cal:0,pro:0})}
+function renderPlan(){let day=weeklyPlan[selectedPlanDay];document.getElementById('planDays').innerHTML=weeklyPlan.map((d,i)=>`<button class="${i===selectedPlanDay?'':'secondary'} plan-day" onclick="selectPlanDay(${i})">${d.day.slice(0,3)}</button>`).join('');let totals={cal:0,pro:0};let html=`<h3>${day.day}</h3>`;day.meals.forEach((m,i)=>{let t=mealTotals(m);totals.cal+=t.cal;totals.pro+=t.pro;html+=`<div class="meal-card"><div class="row"><strong>${m.name}</strong><span class="meal-total">${Math.round(t.cal)} kcal</span></div><div class="ingredient-list">${m.items.map(x=>`<div class="row"><span>${x[0]} · ${x[1]}</span><span>${x[2]} kcal · ${x[3]}g protein</span></div>`).join('')}</div><div class="row"><span class="muted">Meal protein</span><strong>${t.pro.toFixed(1)} g</strong></div><button class="secondary log-plan" onclick="logPlannedMeal(${selectedPlanDay},${i})">＋ Log this meal today</button></div>`});html+=`<div class="card"><div class="row"><strong>Daily planned total</strong><span class="day-total">${Math.round(totals.cal)} kcal</span></div><p>${totals.pro.toFixed(1)} g protein · ${Math.round(totals.cal-1900)>0?Math.round(totals.cal-1900)+' kcal above':Math.abs(Math.round(totals.cal-1900))+' kcal below'} the 1,900 kcal starting guide.</p><p class="muted">These are estimates based on typical foods, not exact laboratory values. Brand, size and preparation can change the totals.</p></div>`;document.getElementById('planContent').innerHTML=html}
+function selectPlanDay(i){selectedPlanDay=i;renderPlan()}
+function logPlannedMeal(d,m){let meal=weeklyPlan[d].meals[m],t=mealTotals(meal);data.foods.push({date:today(),type:m===0?'Meal 1':m===1?'Meal 2':'Snack',name:meal.name,cal:Math.round(t.cal),pro:Number(t.pro.toFixed(1))});save();alert('Planned meal added to today\'s food diary.')}
 function addFood(){let name=document.getElementById('foodName').value.trim(),cal=Number(document.getElementById('foodCalories').value),pro=Number(document.getElementById('foodProtein').value);if(!name||cal<0||!Number.isFinite(cal)){alert('Please enter a food name and valid calories.');return}data.foods.push({date:today(),type:document.getElementById('mealType').value,name,cal,pro:pro||0});['foodName','foodCalories','foodProtein'].forEach(id=>document.getElementById(id).value='');save()}
 function renderFood(){let list=data.foods.filter(x=>x.date===today()),cal=list.reduce((s,x)=>s+x.cal,0),pro=list.reduce((s,x)=>s+x.pro,0);document.getElementById('calTotal').textContent=Math.round(cal);document.getElementById('proteinTotal').textContent=Math.round(pro)+'g';document.getElementById('calBar').style.width=Math.min(100,cal/1900*100)+'%';document.getElementById('foodDate').textContent=new Date().toLocaleDateString();document.getElementById('foodEntries').innerHTML=list.length?list.map(x=>`<div class="item"><div class="row"><strong>${esc(x.name)}</strong><span>${x.cal} kcal</span></div><p>${esc(x.type)} · ${x.pro}g protein</p></div>`).join(''):'No food logged today yet.'}
 const workouts={A:[['Leg press','3 × 10–12'],['Chest press','3 × 10–12'],['Lat pulldown','3 × 10–12'],['Seated leg curl','2 × 12'],['Seated row','3 × 10–12'],['Plank','3 × 20–30 sec']],B:[['Goblet squat','3 × 10'],['Dumbbell shoulder press','3 × 10'],['Seated cable row','3 × 12'],['Romanian deadlift','3 × 10'],['Chest press','2 × 12'],['Abdominal crunch','3 × 15']],C:[['Treadmill walk','10 min'],['Exercise bike','15 min'],['Cross trainer','10–15 min'],['Gentle stretching','5 min']]};
@@ -142,10 +187,10 @@ function saveCheckin(){let item={date:today(),weight:Number(document.getElementB
 function renderCheckins(){document.getElementById('checkinHistory').innerHTML=data.checkins.length?data.checkins.map(x=>`<div class="item"><div class="row"><strong>${esc(x.date)}</strong><span>${x.weight.toFixed(1)} kg</span></div><p>${x.gym} gym sessions · ${esc(x.hunger)} hunger · ${esc(x.energy)} energy</p></div>`).join(''):'No check-ins saved yet.'}
 function makeReport(){let w=latestWeight(),c=data.checkins[0],s=data.sessions.filter(x=>x.date>=new Date(Date.now()-7*86400000).toISOString().slice(0,10));let foods=data.foods.filter(x=>x.date>=new Date(Date.now()-7*86400000).toISOString().slice(0,10));let avg=foods.length?Math.round(foods.reduce((a,x)=>a+x.cal,0)/Math.max(1,new Set(foods.map(x=>x.date)).size)):0;let report=`MY 80KG JOURNEY — WEEKLY CHECK-IN\nDate: ${today()}\nStarting weight: ${data.startWeight} kg\nLatest weight: ${w} kg\nChange since start: ${(data.startWeight-w).toFixed(1)} kg\nGoal: 80 kg\nGym sessions logged in last 7 days: ${s.length}\nFood entries logged in last 7 days: ${foods.length}\nAverage calories per day with food logs (rough): ${avg||'Not enough entries'}\nLatest check-in: ${c?c.date:'Not completed'}\nGym sessions reported: ${c?.gym||'—'}\nAverage steps: ${c?.steps||'—'}\nHunger: ${c?.hunger||'—'}\nEnergy: ${c?.energy||'—'}\nWhat went well: ${c?.wins||'—'}\nChallenges: ${c?.challenges||'—'}\nPlease review my progress and suggest sensible adjustments to my food and gym plan. Keep my £25–£30 weekly food budget, no pork and mild lactose intolerance in mind.`;document.getElementById('report').value=report}
 async function copyReport(){let t=document.getElementById('report').value;if(!t){makeReport();t=document.getElementById('report').value}try{await navigator.clipboard.writeText(t);alert('Report copied. Paste it into our ChatGPT conversation.')}catch(e){document.getElementById('report').select();alert('Select and copy the report text.')}} 
-const items=['Oats · 500g','Eggs · 15','Chicken · around 1kg','Tinned tuna · 3 tins','Rice · 500g','Potatoes · 1–1.5kg','Wholemeal bread · 1 loaf','Kidney beans · 3 tins','Chopped tomatoes · 3 tins','Frozen mixed vegetables · 1kg','Bananas · 6–7','Apples · 4–5','Onions · 3–4'];
+const items=['Oats · 1kg bag (plan uses about 620g)','Eggs · about 25 (check pack size)','Chicken breast · about 900g','Tinned tuna · 4 tins (about 480g drained)','Rice · 500g bag (plan uses 260g)','Potatoes · about 1.5kg','Wholemeal bread · 1 loaf (about 18 slices)','Kidney beans · 2 tins','Baked beans · 1 tin','Chopped tomatoes · 1 tin (about 500g)','Frozen mixed vegetables · about 1.25kg','Bananas · 7–8','Apples · 6','Sweetcorn · 1 small tin','Onions · 2'];
 function renderShop(){document.getElementById('shoppingList').innerHTML=items.map((x,i)=>`<label class="check"><input type="checkbox" ${data.shopping[i]?'checked':''} onchange="data.shopping[${i}]=this.checked;localStorage.setItem(KEY,JSON.stringify(data))">${x}</label>`).join('');document.getElementById('spendDisplay').textContent=data.spend==null?'No spend recorded.':'Last recorded weekly spend: £'+Number(data.spend).toFixed(2)}
 function saveSpend(){data.spend=Number(document.getElementById('spendInput').value);save()}
-function renderAll(){renderHome();renderFood();renderSessions();renderCheckins();renderShop();if(document.getElementById('weight').classList.contains('active'))drawChart()}
+function renderAll(){renderHome();renderPlan();renderFood();renderSessions();renderCheckins();renderShop();if(document.getElementById('weight').classList.contains('active'))drawChart()}
 function exportData(){let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='80kg-journey-backup-'+today()+'.json';a.click();URL.revokeObjectURL(a.href)}
 function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{data={...defaults,...JSON.parse(r.result)};save();alert('Backup imported.')}catch(err){alert('That backup file could not be read.')}};r.readAsText(f)}
 function resetData(){if(confirm('Are you sure? This will erase all locally saved entries. Export a backup first if you want to keep them.')){localStorage.removeItem(KEY);data={...defaults,weights:[{date:today(),value:90.2}]};save()}}
