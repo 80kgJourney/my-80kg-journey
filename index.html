@@ -28,10 +28,22 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;p
 .notice{font-size:12px;background:#26372b;border-radius:12px;padding:11px;color:#d9e8d8;line-height:1.5}.tabs{display:flex;gap:7px;overflow:auto;margin:12px 0}.tabs button{white-space:nowrap}.empty{color:var(--muted);font-size:13px;padding:12px 0}.plan-day{min-width:76px}.ingredient-list{margin:8px 0}.ingredient-list .row{font-size:13px;padding:5px 0;border-bottom:1px solid #304238}.meal-card{background:#202d25;border:1px solid #304238;border-radius:13px;padding:12px;margin:10px 0}.meal-total{font-size:13px;color:var(--green);font-weight:700}.day-total{font-size:15px;font-weight:800;color:var(--green)}.log-plan{width:100%;margin-top:10px}
 canvas{width:100%;height:190px}
 @media(min-width:650px){main{padding:24px}.grid.three{grid-template-columns:repeat(3,1fr)}header{padding-left:max(18px,calc((100% - 712px)/2))}}
+
+.header-actions{display:flex;align-items:center;gap:7px}.theme-toggle{font-size:11px;padding:8px 9px;white-space:nowrap}
+body[data-theme="light"]{--bg:#f3f6f2;--panel:#ffffff;--panel2:#e8eee8;--line:#d4ded4;--text:#1b2a20;--muted:#647368;--green:#527e4e;--green2:#6f9c69;--orange:#a65d20;--red:#b44d43}
+body[data-theme="light"] header{background:linear-gradient(135deg,#e3eee2,#f7faf6)}
+body[data-theme="light"] .week{background:#e1ecdf;color:#416c40}
+body[data-theme="light"] .pill{background:#e7efe5;color:#416c40}
+body[data-theme="light"] input,body[data-theme="light"] select,body[data-theme="light"] textarea{background:#fff;color:var(--text)}
+body[data-theme="light"] .nav{background:#fff}
+body[data-theme="light"] .progress{background:#dce6dc}
+body[data-theme="light"] .notice{background:#e6efe4;color:#344c36}
+body[data-theme="light"] .meal-card{background:#f1f6ef;border-color:#d6e2d3}
+body[data-theme="light"] .ingredient-list .row{border-color:#d4ded4}
 </style>
 </head>
 <body>
-<header><div class="top"><div class="brand">MY <span>80KG</span> JOURNEY</div><div class="week" id="weekPill">WEEK 1 · LET'S GO</div></div></header>
+<header><div class="top"><div class="brand">MY <span>80KG</span> JOURNEY</div><div class="header-actions"><button class="theme-toggle secondary" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle colour theme">☀ Light</button><div class="week" id="weekPill">WEEK 1 · LET'S GO</div></div></div></header>
 <main>
 <section class="view active" id="home">
 <h1>Your journey starts here.</h1><p>Small steps. Strong habits. Sustainable progress.</p>
@@ -42,6 +54,7 @@ canvas{width:100%;height:190px}
  <div class="card metric"><small>TO GO</small><strong id="remaining">10.2 kg</strong><em>Keep showing up</em></div>
 </div>
 <div class="card"><div class="row"><h2>Progress to 80kg</h2><span class="pill" id="progressPct">0% complete</span></div><div class="progress"><i id="progressBar"></i></div><p id="progressCaption">Your starting point is 90.2kg.</p></div>
+<div class="card"><div class="row"><h2>Today's nutrition</h2><span class="pill">Daily guide</span></div><div class="grid"><div class="metric"><small>CALORIES</small><strong id="homeCalories">0</strong><em>of 1,900 kcal</em><div class="progress"><i id="homeCalBar"></i></div></div><div class="metric"><small>PROTEIN</small><strong id="homeProtein">0g</strong><em>Guide: 110–130g</em><div class="progress"><i id="homeProteinBar"></i></div></div></div><div class="grid"><div><label for="waterInput">Water (ml)</label><input id="waterInput" type="number" min="0" step="250" placeholder="e.g. 1500"></div><div><label for="stepsInput">Steps</label><input id="stepsInput" type="number" min="0" step="100" placeholder="e.g. 6500"></div></div><button class="secondary" onclick="saveDailyMetrics()">Save water & steps</button><p class="muted" id="dailyMetricNote">Track hydration and movement as useful habits, not pass/fail targets.</p></div>
 <div class="card"><div class="row"><h2>Today's focus</h2><span class="pill" id="todayDate"></span></div>
 <label class="check"><input type="checkbox" data-habit="water"> Drink water regularly</label>
 <label class="check"><input type="checkbox" data-habit="movement"> Walk or move today</label>
@@ -162,6 +175,7 @@ const weeklyPlan=[
 let selectedPlanDay=0;
 
 let data=load();
+data.dailyMetrics=data.dailyMetrics||{};
 function load(){try{return {...defaults,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return {...defaults}}}
 function save(){localStorage.setItem(KEY,JSON.stringify(data));renderAll()}
 function today(){return new Date().toISOString().slice(0,10)}
@@ -170,7 +184,11 @@ function show(id){document.querySelectorAll('.view').forEach(x=>x.classList.togg
 document.querySelectorAll('[data-habit]').forEach(el=>{el.addEventListener('change',()=>{data.habits[today()]??={};data.habits[today()][el.dataset.habit]=el.checked;localStorage.setItem(KEY,JSON.stringify(data));updateHabits()})});
 function updateHabits(){let h=data.habits[today()]||{};document.querySelectorAll('[data-habit]').forEach(el=>el.checked=!!h[el.dataset.habit]);let n=Object.values(h).filter(Boolean).length;document.getElementById('habitCount').textContent=n+' of 4 completed'}
 function latestWeight(){return [...data.weights].sort((a,b)=>a.date.localeCompare(b.date)).at(-1)?.value??90.2}
-function renderHome(){let w=latestWeight(),lost=data.startWeight-w,remaining=Math.max(0,w-data.goal),pct=Math.max(0,Math.min(100,lost/(data.startWeight-data.goal)*100));document.getElementById('currentWeight').textContent=w.toFixed(1)+' kg';document.getElementById('lost').textContent=lost.toFixed(1)+' kg';document.getElementById('remaining').textContent=remaining.toFixed(1)+' kg';document.getElementById('progressPct').textContent=pct.toFixed(0)+'% complete';document.getElementById('progressBar').style.width=pct+'%';document.getElementById('progressCaption').textContent=pct>0?'You have made progress. Keep building steady habits.':'Your starting point is 90.2kg.';document.getElementById('todayDate').textContent=new Date().toLocaleDateString(undefined,{day:'numeric',month:'short'});let days=Math.max(1,Math.floor((Date.now()-new Date(data.weights[0].date).getTime())/86400000));document.getElementById('weekPill').textContent='WEEK '+(Math.floor(days/7)+1)+' · LET’S GO';updateHabits()}
+function applyTheme(){let t=data.theme==='light'?'light':'dark';document.body.dataset.theme=t;let b=document.getElementById('themeToggle');if(b)b.textContent=t==='light'?'☾ Dark':'☀ Light';document.querySelector('meta[name="theme-color"]').content=t==='light'?'#f3f6f2':'#111a16'}
+function toggleTheme(){data.theme=data.theme==='light'?'dark':'light';localStorage.setItem(KEY,JSON.stringify(data));applyTheme()}
+function saveDailyMetrics(){data.dailyMetrics=data.dailyMetrics||{};data.dailyMetrics[today()]={water:Math.max(0,Number(document.getElementById('waterInput').value)||0),steps:Math.max(0,Number(document.getElementById('stepsInput').value)||0)};save();document.getElementById('dailyMetricNote').textContent='Saved for today. Keep building consistency.'}
+function renderDailySummary(){let list=data.foods.filter(x=>x.date===today()),cal=list.reduce((s,x)=>s+(Number(x.cal)||0),0),pro=list.reduce((s,x)=>s+(Number(x.pro)||0),0);document.getElementById('homeCalories').textContent=Math.round(cal).toLocaleString();document.getElementById('homeProtein').textContent=Math.round(pro)+'g';document.getElementById('homeCalBar').style.width=Math.min(100,cal/1900*100)+'%';document.getElementById('homeProteinBar').style.width=Math.min(100,pro/120*100)+'%';let m=(data.dailyMetrics||{})[today()]||{};document.getElementById('waterInput').value=m.water||'';document.getElementById('stepsInput').value=m.steps||''}
+function renderHome(){let w=latestWeight(),lost=data.startWeight-w,remaining=Math.max(0,w-data.goal),pct=Math.max(0,Math.min(100,lost/(data.startWeight-data.goal)*100));document.getElementById('currentWeight').textContent=w.toFixed(1)+' kg';document.getElementById('lost').textContent=lost.toFixed(1)+' kg';document.getElementById('remaining').textContent=remaining.toFixed(1)+' kg';document.getElementById('progressPct').textContent=pct.toFixed(0)+'% complete';document.getElementById('progressBar').style.width=pct+'%';document.getElementById('progressCaption').textContent=pct>0?'You have made progress. Keep building steady habits.':'Your starting point is 90.2kg.';document.getElementById('todayDate').textContent=new Date().toLocaleDateString(undefined,{day:'numeric',month:'short'});let days=Math.max(1,Math.floor((Date.now()-new Date(data.weights[0].date).getTime())/86400000));document.getElementById('weekPill').textContent='WEEK '+(Math.floor(days/7)+1)+' · LET’S GO';updateHabits();renderDailySummary();applyTheme()}
 function mealTotals(meal){return meal.items.reduce((a,x)=>({cal:a.cal+x[2],pro:a.pro+x[3]}),{cal:0,pro:0})}
 function renderPlan(){let day=weeklyPlan[selectedPlanDay];document.getElementById('planDays').innerHTML=weeklyPlan.map((d,i)=>`<button class="${i===selectedPlanDay?'':'secondary'} plan-day" onclick="selectPlanDay(${i})">${d.day.slice(0,3)}</button>`).join('');let totals={cal:0,pro:0};let html=`<h3>${day.day}</h3>`;day.meals.forEach((m,i)=>{let t=mealTotals(m);totals.cal+=t.cal;totals.pro+=t.pro;html+=`<div class="meal-card"><div class="row"><strong>${m.name}</strong><span class="meal-total">${Math.round(t.cal)} kcal</span></div><div class="ingredient-list">${m.items.map(x=>`<div class="row"><span>${x[0]} · ${x[1]}</span><span>${x[2]} kcal · ${x[3]}g protein</span></div>`).join('')}</div><div class="row"><span class="muted">Meal protein</span><strong>${t.pro.toFixed(1)} g</strong></div><button class="secondary log-plan" onclick="logPlannedMeal(${selectedPlanDay},${i})">＋ Log this meal today</button></div>`});html+=`<div class="card"><div class="row"><strong>Daily planned total</strong><span class="day-total">${Math.round(totals.cal)} kcal</span></div><p>${totals.pro.toFixed(1)} g protein · ${Math.round(totals.cal-1900)>0?Math.round(totals.cal-1900)+' kcal above':Math.abs(Math.round(totals.cal-1900))+' kcal below'} the 1,900 kcal starting guide.</p><p class="muted">These are estimates based on typical foods, not exact laboratory values. Brand, size and preparation can change the totals.</p></div>`;document.getElementById('planContent').innerHTML=html}
 function selectPlanDay(i){selectedPlanDay=i;renderPlan()}
